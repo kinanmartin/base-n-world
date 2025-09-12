@@ -106,6 +106,64 @@
 
         const digits = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         window.digits = digits; // Make it accessible for the toBaseNDecimal function
+        
+        // localStorage key
+        const STORAGE_KEY = 'baseNMathQuizSettings';
+        
+        // Load settings from localStorage
+        function loadSettings() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const settings = JSON.parse(saved);
+                    
+                    // Apply saved settings to form
+                    document.getElementById('base').value = settings.base || 10;
+                    document.getElementById('numQuestions').value = settings.numQuestions || 10;
+                    document.getElementById('maxDigits').value = settings.maxDigits || 2;
+                    
+                    // Set operation checkboxes
+                    document.getElementById('addition').checked = settings.addition !== undefined ? settings.addition : true;
+                    document.getElementById('subtraction').checked = settings.subtraction !== undefined ? settings.subtraction : true;
+                    document.getElementById('multiplication').checked = settings.multiplication !== undefined ? settings.multiplication : true;
+                    document.getElementById('division').checked = settings.division !== undefined ? settings.division : true;
+                    
+                    // Set division settings
+                    if (settings.division) {
+                        toggleDivisionSettings();
+                        document.getElementById('maxQuotientDigits').value = settings.maxQuotientDigits || 2;
+                        document.getElementById('fractionalDigits').value = settings.fractionalDigits || 2;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
+            }
+        }
+        
+        // Save settings to localStorage
+        function saveSettings() {
+            try {
+                const settings = {
+                    base: parseInt(document.getElementById('base').value),
+                    numQuestions: parseInt(document.getElementById('numQuestions').value),
+                    maxDigits: parseInt(document.getElementById('maxDigits').value),
+                    addition: document.getElementById('addition').checked,
+                    subtraction: document.getElementById('subtraction').checked,
+                    multiplication: document.getElementById('multiplication').checked,
+                    division: document.getElementById('division').checked,
+                    maxQuotientDigits: parseInt(document.getElementById('maxQuotientDigits').value),
+                    fractionalDigits: parseInt(document.getElementById('fractionalDigits').value)
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+            } catch (error) {
+                console.error('Error saving settings:', error);
+            }
+        }
+        
+        // Load settings when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSettings();
+        });
 
         function toggleDivisionSettings() {
             const divisionChecked = document.getElementById('division').checked;
@@ -313,6 +371,9 @@
         }
 
         function startQuiz() {
+            // Save settings before starting quiz
+            saveSettings();
+            
             // Validate inputs
             let base = parseInt(document.getElementById('base').value);
             let numQuestions = parseInt(document.getElementById('numQuestions').value);

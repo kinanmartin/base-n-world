@@ -182,8 +182,71 @@
         const baseLabel = document.getElementById('baseLabel');
         const timeUnits = document.getElementById('timeUnits');
         
+        // localStorage key
+        const STORAGE_KEY = 'baseNClockSettings';
+        
+        // Load settings from localStorage
+        function loadSettings() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const settings = JSON.parse(saved);
+                    
+                    // Apply saved settings
+                    currentBase = settings.base || 10;
+                    clockDirection = settings.direction || 'clockwise';
+                    clockRotation = settings.rotation || 0;
+                    showLabels = settings.showLabels !== undefined ? settings.showLabels : true;
+                    handLengthStyle = settings.handLengthStyle || 'longer';
+                    maxHands = settings.maxHands || 6;
+                    maxUnits = settings.maxUnits || 6;
+                    separatorDigits = settings.separatorDigits !== undefined ? settings.separatorDigits : 1;
+                    
+                    // Update UI elements to reflect loaded settings
+                    document.getElementById('baseSlider').value = currentBase;
+                    document.getElementById('baseInput').value = currentBase;
+                    document.getElementById('rotationSlider').value = clockRotation;
+                    document.getElementById('rotationValue').textContent = clockRotation + '°';
+                    document.getElementById('showLabels').checked = showLabels;
+                    document.getElementById('maxHandsSlider').value = maxHands;
+                    document.getElementById('maxHandsValue').textContent = maxHands;
+                    document.getElementById('maxUnitsSlider').value = maxUnits;
+                    document.getElementById('maxUnitsValue').textContent = maxUnits;
+                    document.getElementById('separatorInput').value = separatorDigits;
+                    
+                    // Set radio buttons
+                    document.querySelector(`input[name="direction"][value="${clockDirection}"]`).checked = true;
+                    document.querySelector(`input[name="handLength"][value="${handLengthStyle}"]`).checked = true;
+                    
+                    updateBaseDisplay();
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
+            }
+        }
+        
+        // Save settings to localStorage
+        function saveSettings() {
+            try {
+                const settings = {
+                    base: currentBase,
+                    direction: clockDirection,
+                    rotation: clockRotation,
+                    showLabels: showLabels,
+                    handLengthStyle: handLengthStyle,
+                    maxHands: maxHands,
+                    maxUnits: maxUnits,
+                    separatorDigits: separatorDigits
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+            } catch (error) {
+                console.error('Error saving settings:', error);
+            }
+        }
+        
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            loadSettings();
             setupEventListeners();
             resizeCanvas();
             window.addEventListener('resize', resizeCanvas);
@@ -239,6 +302,7 @@
                 currentBase = parseInt(this.value);
                 baseInput.value = currentBase;
                 updateBaseDisplay();
+                saveSettings();
             });
             
             baseInput.addEventListener('change', function() {
@@ -248,12 +312,14 @@
                 this.value = currentBase;
                 baseSlider.value = currentBase;
                 updateBaseDisplay();
+                saveSettings();
             });
             
             // Direction
             document.querySelectorAll('input[name="direction"]').forEach(radio => {
                 radio.addEventListener('change', function() {
                     clockDirection = this.value;
+                    saveSettings();
                 });
             });
             
@@ -262,12 +328,14 @@
             rotationSlider.addEventListener('input', function() {
                 clockRotation = parseInt(this.value);
                 document.getElementById('rotationValue').textContent = clockRotation + '°';
+                saveSettings();
             });
             
             // Hand Length Style
             document.querySelectorAll('input[name="handLength"]').forEach(radio => {
                 radio.addEventListener('change', function() {
                     handLengthStyle = this.value;
+                    saveSettings();
                 });
             });
             
@@ -276,6 +344,7 @@
             maxHandsSlider.addEventListener('input', function() {
                 maxHands = parseInt(this.value);
                 document.getElementById('maxHandsValue').textContent = maxHands;
+                saveSettings();
             });
             
             // Max Units
@@ -283,6 +352,7 @@
             maxUnitsSlider.addEventListener('input', function() {
                 maxUnits = parseInt(this.value);
                 document.getElementById('maxUnitsValue').textContent = maxUnits;
+                saveSettings();
             });
             
             // Separator Digits
@@ -292,11 +362,13 @@
                 if (separatorDigits < 0) separatorDigits = 0;
                 if (separatorDigits > 12) separatorDigits = 12;
                 this.value = separatorDigits;
+                saveSettings();
             });
             
             // Show labels
             document.getElementById('showLabels').addEventListener('change', function() {
                 showLabels = this.checked;
+                saveSettings();
             });
             
             // Sidebar toggle (mobile)
