@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base-N Clock - Explore Time in Different Bases</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .sidebar {
+            transition: transform 0.3s ease-in-out;
+        }
+        .sidebar.collapsed {
+            transform: translateX(100%);
+        }
+        .clock-hand {
+            transform-origin: bottom center;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center overflow-hidden">
+    <div class="w-full h-screen flex items-center justify-center">
+        <!-- Main Clock Area -->
+        <div class="flex flex-col items-center justify-center p-4">
+            <!-- Analog Clock -->
+            <div class="relative mb-3">
+                <canvas id="clockCanvas" width="800" height="800" class="rounded-full shadow-2xl bg-gray-800"></canvas>
+            </div>
+
+            <!-- Digital Time Display -->
+            <div class="text-center" id="textDisplay">
+                <div id="digitalTime" class="font-mono font-bold"></div>
+                <div id="digitalDate" class="font-mono"></div>
+                <div id="baseLabel" class="text-gray-400"></div>
+            </div>
+
+            <!-- Time Unit Labels (hidden but code preserved) -->
+            <!-- <div id="timeUnits" class="text-center text-sm text-gray-400 mb-4"></div> -->
+        </div>
+
+        <!-- Settings Sidebar -->
+        <button id="toggleSidebar" class="fixed top-4 right-4 z-50 bg-blue-600 p-2 rounded-lg shadow-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+            </svg>
+        </button>
+
+        <div id="sidebar" class="sidebar fixed top-0 right-0 h-full bg-gray-800 shadow-xl z-40 w-80 overflow-y-auto">
+                    <div class="p-6">
+                        <div class="mb-6">
+                            <h1 class="text-2xl font-bold mb-1">Base-N Clock</h1>
+                            <p class="text-sm text-gray-400">Explore time in different number bases</p>
+                        </div>
+
+                    <!-- Base Selection -->
+                    <div class="mb-6">
+                        <label for="baseSelect" class="block text-sm font-medium mb-2">Number Base</label>
+                        <div class="flex items-center gap-2">
+                            <input type="range" id="baseSlider" min="2" max="36" value="10" class="flex-1">
+                            <input type="number" id="baseInput" min="2" max="36" value="10" class="w-16 bg-gray-700 text-white px-2 py-1 rounded">
+                        </div>
+                        <div class="text-xs text-gray-400 mt-1">Base <span id="baseValue">10</span></div>
+                    </div>
+
+                    <!-- Clock Direction -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium mb-2">Clock Direction</label>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="radio" name="direction" value="clockwise" checked class="mr-2">
+                                <span>Clockwise</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="direction" value="counterclockwise" class="mr-2">
+                                <span>Counterclockwise</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Clock Rotation -->
+                    <div class="mb-6">
+                        <label for="rotationSlider" class="block text-sm font-medium mb-2">Clock Rotation</label>
+                        <div class="flex items-center gap-2">
+                            <input type="range" id="rotationSlider" min="0" max="360" value="0" class="flex-1">
+                            <span id="rotationValue" class="text-sm w-12">0°</span>
+                        </div>
+                        <div class="text-xs text-gray-400 mt-1">Zero position rotation</div>
+                    </div>
+
+                    <!-- Hand Length Direction -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium mb-2">Hand Length Style</label>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="radio" name="handLength" value="shorter" class="mr-2">
+                                <span>Shorter for finer units</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="handLength" value="longer" checked class="mr-2">
+                                <span>Longer for finer units</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Max Hands -->
+                    <div class="mb-6">
+                        <label for="maxHandsSlider" class="block text-sm font-medium mb-2">Maximum Hands (Analog)</label>
+                        <div class="flex items-center gap-2">
+                            <input type="range" id="maxHandsSlider" min="2" max="12" value="6" class="flex-1">
+                            <span id="maxHandsValue" class="text-sm w-8">6</span>
+                        </div>
+                        <div class="text-xs text-gray-400 mt-1">Max possible: <span id="maxPossibleHands">6</span></div>
+                    </div>
+
+                    <!-- Max Units -->
+                    <div class="mb-6">
+                        <label for="maxUnitsSlider" class="block text-sm font-medium mb-2">Maximum Units (Digital)</label>
+                        <div class="flex items-center gap-2">
+                            <input type="range" id="maxUnitsSlider" min="2" max="20" value="6" class="flex-1">
+                            <span id="maxUnitsValue" class="text-sm w-8">6</span>
+                        </div>
+                        <div class="text-xs text-gray-400 mt-1">Max possible: <span id="maxPossibleUnits">6</span></div>
+                    </div>
+
+                    <!-- Separator Placement -->
+                    <div class="mb-6">
+                        <label for="separatorInput" class="block text-sm font-medium mb-2">Digital Time Separator</label>
+                        <div class="flex items-center gap-2">
+                            <input type="number" id="separatorInput" min="0" max="12" value="1" class="w-20 bg-gray-700 text-white px-2 py-1 rounded">
+                            <span class="text-sm text-gray-400">digits (0 = none)</span>
+                        </div>
+                        <div class="text-xs text-gray-400 mt-1">Place ':' after every N digits</div>
+                    </div>
+
+                    <!-- Show Labels -->
+                    <div class="mb-6">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="showLabels" checked class="mr-2">
+                            <span>Show number labels</span>
+                        </label>
+                    </div>
+
+                    <!-- Info Section -->
+                    <div class="bg-gray-700 rounded-lg p-4 mt-6">
+                        <h3 class="font-semibold mb-2">How it works</h3>
+                        <p class="text-sm text-gray-300">
+                            In base-<span id="infoBase">10</span>, the day is divided into <span id="infoUnits">10</span> primary units. 
+                            Each unit is further divided into <span id="infoSubunits">10</span> subunits, creating a hierarchical time system.
+                        </p>
+                    </div>
+                    </div>
+                </div>
+    </div>
+
+    <script>
+        // Global state
+        let currentBase = 10;
+        let clockDirection = 'clockwise';
+        let clockRotation = 0;
+        let showLabels = true;
+        let handLengthStyle = 'longer';
+        let maxHands = 6;
+        let maxUnits = 6;
+        let separatorDigits = 1;
+        let animationFrame = null;
+
+        // Constants
+        const MIN_UPDATE_INTERVAL = 100; // Minimum time unit in milliseconds
+        const HAND_COLORS = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#a855f7', '#14b8a6', '#facc15'];
+        
+        // DOM elements
+        const canvas = document.getElementById('clockCanvas');
+        const ctx = canvas.getContext('2d');
+        const digitalTime = document.getElementById('digitalTime');
+        const digitalDate = document.getElementById('digitalDate');
+        const baseLabel = document.getElementById('baseLabel');
+        const timeUnits = document.getElementById('timeUnits');
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            updateClock();
+        });
+        
+        function resizeCanvas() {
+            // Calculate available space
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            
+            // More padding to ensure space from edges
+            const padding = 40; // Increased from 20
+            
+            // Calculate maximum dimensions considering both width and height constraints
+            const maxWidth = viewportWidth - padding * 2;
+            
+            // For height, we need to fit both clock and text
+            // Total height = clock height + text height + margin
+            // Text height scales with clock, approximately 20% of clock size
+            // So total height = clock + 0.2*clock = 1.2*clock
+            // Therefore: clock = available_height / 1.2
+            const availableHeight = viewportHeight - padding * 2;
+            const maxHeightForClock = availableHeight / 1.25; // Slightly more conservative
+            
+            // Use the smaller dimension to maintain perfect circle and fit everything
+            const size = Math.min(maxWidth, maxHeightForClock, 800);
+            
+            // Set both width and height to same value for perfect circle
+            canvas.width = size;
+            canvas.height = size;
+            
+            // Important: Don't set style width/height differently from canvas width/height
+            // to avoid distortion
+            canvas.style.width = size + 'px';
+            canvas.style.height = size + 'px';
+            
+            // Scale text based on clock size, but cap it to prevent overflow
+            const scaleFactor = Math.min(size / 400, 1.5); // Cap at 1.5x to prevent text getting too large
+            
+            // Apply dynamic font sizes
+            digitalTime.style.fontSize = (2.5 * scaleFactor) + 'rem';
+            digitalDate.style.fontSize = (1.25 * scaleFactor) + 'rem';
+            baseLabel.style.fontSize = (0.875 * scaleFactor) + 'rem';
+        }
+
+        function setupEventListeners() {
+            // Base selection
+            const baseSlider = document.getElementById('baseSlider');
+            const baseInput = document.getElementById('baseInput');
+            
+            baseSlider.addEventListener('input', function() {
+                currentBase = parseInt(this.value);
+                baseInput.value = currentBase;
+                updateBaseDisplay();
+            });
+            
+            baseInput.addEventListener('change', function() {
+                currentBase = parseInt(this.value);
+                if (currentBase < 2) currentBase = 2;
+                if (currentBase > 36) currentBase = 36;
+                this.value = currentBase;
+                baseSlider.value = currentBase;
+                updateBaseDisplay();
+            });
+            
+            // Direction
+            document.querySelectorAll('input[name="direction"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    clockDirection = this.value;
+                });
+            });
+            
+            // Rotation
+            const rotationSlider = document.getElementById('rotationSlider');
+            rotationSlider.addEventListener('input', function() {
+                clockRotation = parseInt(this.value);
+                document.getElementById('rotationValue').textContent = clockRotation + '°';
+            });
+            
+            // Hand Length Style
+            document.querySelectorAll('input[name="handLength"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    handLengthStyle = this.value;
+                });
+            });
+            
+            // Max Hands
+            const maxHandsSlider = document.getElementById('maxHandsSlider');
+            maxHandsSlider.addEventListener('input', function() {
+                maxHands = parseInt(this.value);
+                document.getElementById('maxHandsValue').textContent = maxHands;
+            });
+            
+            // Max Units
+            const maxUnitsSlider = document.getElementById('maxUnitsSlider');
+            maxUnitsSlider.addEventListener('input', function() {
+                maxUnits = parseInt(this.value);
+                document.getElementById('maxUnitsValue').textContent = maxUnits;
+            });
+            
+            // Separator Digits
+            const separatorInput = document.getElementById('separatorInput');
+            separatorInput.addEventListener('input', function() {
+                separatorDigits = parseInt(this.value);
+                if (separatorDigits < 0) separatorDigits = 0;
+                if (separatorDigits > 12) separatorDigits = 12;
+                this.value = separatorDigits;
+            });
+            
+            // Show labels
+            document.getElementById('showLabels').addEventListener('change', function() {
+                showLabels = this.checked;
+            });
+            
+            // Sidebar toggle (mobile)
+            const toggleBtn = document.getElementById('toggleSidebar');
+            const sidebar = document.getElementById('sidebar');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', function() {
+                    sidebar.classList.toggle('collapsed');
+                });
+            }
+        }
+
+        function calculateMaxPossibleUnits() {
+            const msInDay = 24 * 60 * 60 * 1000;
+            let unitDuration = msInDay;
+            let count = 0;
+            
+            while (count < 20) { // Safety limit
+                unitDuration = unitDuration / currentBase;
+                if (unitDuration < MIN_UPDATE_INTERVAL) break;
+                count++;
+            }
+            
+            return count;
+        }
+        
+        function updateBaseDisplay() {
+            document.getElementById('baseValue').textContent = currentBase;
+            document.getElementById('infoBase').textContent = currentBase;
+            document.getElementById('infoUnits').textContent = currentBase;
+            document.getElementById('infoSubunits').textContent = currentBase;
+            baseLabel.textContent = `Base-${currentBase} Time`;
+            
+            // Update max possible units and hands
+            const maxPossible = calculateMaxPossibleUnits();
+            
+            // Update units slider
+            document.getElementById('maxPossibleUnits').textContent = maxPossible;
+            const maxUnitsSlider = document.getElementById('maxUnitsSlider');
+            maxUnitsSlider.max = maxPossible;
+            if (maxUnits > maxPossible) {
+                maxUnits = maxPossible;
+                maxUnitsSlider.value = maxPossible;
+                document.getElementById('maxUnitsValue').textContent = maxPossible;
+            }
+            
+            // Update hands slider
+            document.getElementById('maxPossibleHands').textContent = maxPossible;
+            const maxHandsSlider = document.getElementById('maxHandsSlider');
+            maxHandsSlider.max = maxPossible;
+            if (maxHands > maxPossible) {
+                maxHands = maxPossible;
+                maxHandsSlider.value = maxPossible;
+                document.getElementById('maxHandsValue').textContent = maxPossible;
+            }
+        }
+
+        function getBaseNTime() {
+            const now = new Date();
+            const dayStart = new Date(now);
+            dayStart.setHours(0, 0, 0, 0);
+            
+            // Calculate milliseconds since midnight
+            const msToday = now - dayStart;
+            const msInDay = 24 * 60 * 60 * 1000;
+            
+            // Calculate time units in base N
+            const timeUnits = [];
+            const unitNames = [];
+            let remainingFraction = msToday / msInDay;
+            let unitDuration = msInDay;
+            
+            const maxToCalculate = Math.max(maxHands, maxUnits);
+            
+            for (let i = 0; i < maxToCalculate; i++) {
+                unitDuration = unitDuration / currentBase;
+                if (unitDuration < MIN_UPDATE_INTERVAL) break;
+                
+                const unitValue = Math.floor(remainingFraction * currentBase);
+                const unitFraction = (remainingFraction * currentBase) % 1;
+                
+                timeUnits.push({
+                    value: unitValue,
+                    fraction: unitFraction,
+                    duration: unitDuration
+                });
+                
+                remainingFraction = unitFraction;
+                
+                // Generate unit names
+                if (i === 0) unitNames.push('Primary');
+                else if (i === 1) unitNames.push('Secondary');
+                else if (i === 2) unitNames.push('Tertiary');
+                else unitNames.push(`Level ${i + 1}`);
+            }
+            
+            return { units: timeUnits, names: unitNames };
+        }
+
+        function getBaseNDate() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const dayOfYear = Math.floor((now - new Date(year, 0, 0)) / (24 * 60 * 60 * 1000));
+            
+            // Convert year and day to base N
+            const yearInBaseN = toBaseN(year);
+            const dayInBaseN = toBaseN(dayOfYear);
+            
+            return `Year ${yearInBaseN}, Day ${dayInBaseN}`;
+        }
+
+        function toBaseN(num) {
+            if (currentBase === 10) return num.toString();
+            
+            const digits = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let result = '';
+            
+            if (num === 0) return '0';
+            
+            while (num > 0) {
+                result = digits[num % currentBase] + result;
+                num = Math.floor(num / currentBase);
+            }
+            
+            return result;
+        }
+
+        function drawClock(timeData) {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = canvas.width * 0.45; // 45% of canvas size
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw clock face
+            ctx.strokeStyle = '#4b5563';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            // Draw base-N hour marks and labels
+            for (let i = 0; i < currentBase; i++) {
+                const angle = (i / currentBase) * 2 * Math.PI - Math.PI / 2 + (clockRotation * Math.PI / 180);
+                const x1 = centerX + Math.cos(angle) * (radius - 10);
+                const y1 = centerY + Math.sin(angle) * (radius - 10);
+                const x2 = centerX + Math.cos(angle) * (radius - 20);
+                const y2 = centerY + Math.sin(angle) * (radius - 20);
+                
+                ctx.strokeStyle = '#6b7280';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+                
+                // Draw labels
+                if (showLabels) {
+                    const labelDistance = radius * 0.8; // 80% of radius for label position
+                    const labelX = centerX + Math.cos(angle) * labelDistance;
+                    const labelY = centerY + Math.sin(angle) * labelDistance;
+                    
+                    ctx.fillStyle = '#d1d5db';
+                    // Scale font size with clock size
+                    const fontSize = Math.max(12, radius * 0.08); // 8% of radius, minimum 12px
+                    ctx.font = fontSize + 'px monospace';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    
+                    const label = i < 10 ? i.toString() : String.fromCharCode(65 + i - 10);
+                    ctx.fillText(label, labelX, labelY);
+                }
+            }
+            
+            // Draw center dot
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 5, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Draw hands (limit to maxHands)
+            const handsToDraw = Math.min(timeData.units.length, maxHands);
+            for (let index = 0; index < handsToDraw; index++) {
+                const unit = timeData.units[index];
+                let handLength;
+                if (handLengthStyle === 'longer') {
+                    // Longer for finer units, dynamically scaled based on number of hands
+                    const baseLengthFactor = 0.5; // Always start at 50%
+                    const maxLengthFactor = 0.95; // Maximum at 95%
+                    
+                    // Calculate increment per hand to reach max for the last hand
+                    const totalRange = maxLengthFactor - baseLengthFactor;
+                    const incrementPerHand = handsToDraw > 1 ? totalRange / (handsToDraw - 1) : 0;
+                    
+                    handLength = radius * (baseLengthFactor + index * incrementPerHand);
+                } else {
+                    // Shorter for finer units (default)
+                    handLength = radius * (0.9 - index * 0.12);
+                }
+                const handWidth = Math.max(1, 6 - index);
+                let angle = ((unit.value + unit.fraction) / currentBase) * 2 * Math.PI - Math.PI / 2;
+                
+                // Apply rotation
+                angle += (clockRotation * Math.PI / 180);
+                
+                // Apply direction
+                if (clockDirection === 'counterclockwise') {
+                    angle = -angle;
+                }
+                
+                const x = centerX + Math.cos(angle) * handLength;
+                const y = centerY + Math.sin(angle) * handLength;
+                
+                ctx.strokeStyle = HAND_COLORS[index % HAND_COLORS.length];
+                ctx.lineWidth = handWidth;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            }
+        }
+
+        function formatDigitalTime(timeData) {
+            const digits = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let timeString = '';
+            
+            // Limit to maxUnits for digital display
+            const unitsToDisplay = Math.min(timeData.units.length, maxUnits);
+            
+            for (let index = 0; index < unitsToDisplay; index++) {
+                const unit = timeData.units[index];
+                // Add separator based on user setting
+                if (separatorDigits > 0 && index > 0 && index % separatorDigits === 0) {
+                    timeString += ':';
+                }
+                timeString += digits[unit.value];
+            }
+            
+            return timeString;
+        }
+
+        // Time unit labels function (preserved but not called)
+        function updateTimeUnits(timeData) {
+            let unitsHtml = '';
+            timeData.names.forEach((name, index) => {
+                if (index > 0) unitsHtml += ' · ';
+                unitsHtml += `<span style="color: ${HAND_COLORS[index % HAND_COLORS.length]}">${name}</span>`;
+            });
+            timeUnits.innerHTML = unitsHtml;
+        }
+
+        function updateClock() {
+            const timeData = getBaseNTime();
+            
+            // Update analog clock
+            drawClock(timeData);
+            
+            // Update digital displays
+            digitalTime.textContent = formatDigitalTime(timeData);
+            digitalDate.textContent = getBaseNDate();
+            
+            // Update time unit labels (commented out for now)
+            // updateTimeUnits(timeData);
+            
+            // Schedule next update
+            animationFrame = requestAnimationFrame(updateClock);
+        }
+
+        // Start the clock
+        updateBaseDisplay();
+    </script>
+</body>
+</html>
