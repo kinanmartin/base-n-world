@@ -108,6 +108,16 @@
                         </div>
                     </div>
 
+                    <!-- Hand Thickness -->
+                    <div class="mb-6">
+                        <label for="thicknessSlider" class="block text-sm font-medium mb-2">Hand Thickness</label>
+                        <div class="flex items-center gap-2">
+                            <input type="range" id="thicknessSlider" min="2" max="12" value="6" class="flex-1">
+                            <span id="thicknessValue" class="text-sm w-8">6</span>
+                        </div>
+                        <div class="text-xs text-gray-400 mt-1">Base thickness for primary hand</div>
+                    </div>
+
                     <!-- Max Hands -->
                     <div class="mb-6">
                         <label for="maxHandsSlider" class="block text-sm font-medium mb-2">Maximum Hands (Analog)</label>
@@ -168,6 +178,7 @@
         let maxHands = 6;
         let maxUnits = 6;
         let separatorDigits = 1;
+        let handThickness = 6; // Base thickness for the primary hand
         let animationFrame = null;
 
         // Constants
@@ -201,6 +212,7 @@
                     maxHands = settings.maxHands || 6;
                     maxUnits = settings.maxUnits || 6;
                     separatorDigits = settings.separatorDigits !== undefined ? settings.separatorDigits : 1;
+                    handThickness = settings.handThickness || 6;
                     
                     // Update UI elements to reflect loaded settings
                     document.getElementById('baseSlider').value = currentBase;
@@ -213,6 +225,8 @@
                     document.getElementById('maxUnitsSlider').value = maxUnits;
                     document.getElementById('maxUnitsValue').textContent = maxUnits;
                     document.getElementById('separatorInput').value = separatorDigits;
+                    document.getElementById('thicknessSlider').value = handThickness;
+                    document.getElementById('thicknessValue').textContent = handThickness;
                     
                     // Set radio buttons
                     document.querySelector(`input[name="direction"][value="${clockDirection}"]`).checked = true;
@@ -236,7 +250,8 @@
                     handLengthStyle: handLengthStyle,
                     maxHands: maxHands,
                     maxUnits: maxUnits,
-                    separatorDigits: separatorDigits
+                    separatorDigits: separatorDigits,
+                    handThickness: handThickness
                 };
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
             } catch (error) {
@@ -337,6 +352,14 @@
                     handLengthStyle = this.value;
                     saveSettings();
                 });
+            });
+            
+            // Hand Thickness
+            const thicknessSlider = document.getElementById('thicknessSlider');
+            thicknessSlider.addEventListener('input', function() {
+                handThickness = parseInt(this.value);
+                document.getElementById('thicknessValue').textContent = handThickness;
+                saveSettings();
             });
             
             // Max Hands
@@ -569,7 +592,18 @@
                     // Shorter for finer units (default)
                     handLength = radius * (0.9 - index * 0.12);
                 }
-                const handWidth = Math.max(1, 6 - index);
+                // Calculate hand width proportionally based on max possible hands for this base
+                // This keeps thickness consistent when changing visible hands
+                const minThickness = 1;
+                const maxPossibleHands = calculateMaxPossibleUnits();
+                let handWidth;
+                if (maxPossibleHands <= 1) {
+                    handWidth = handThickness;
+                } else {
+                    const thicknessRange = handThickness - minThickness;
+                    const thicknessDecrement = thicknessRange / (maxPossibleHands - 1);
+                    handWidth = Math.max(minThickness, handThickness - (index * thicknessDecrement));
+                }
                 let angle = ((unit.value + unit.fraction) / currentBase) * 2 * Math.PI - Math.PI / 2;
                 
                 // Apply rotation
