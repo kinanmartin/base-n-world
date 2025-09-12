@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base-N Arithmetic Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-purple-600 to-indigo-700 flex items-center justify-center p-4">
+    <div class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 max-w-2xl w-full">
+        <h1 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600 text-center mb-8">
+            Base-N Arithmetic Quiz
+        </h1>
+        
+        <div id="setupForm" class="space-y-6">
+            <div class="space-y-2">
+                <label for="base" class="block text-sm font-semibold text-gray-700">Base (1-36):</label>
+                <input type="number" id="base" min="1" max="36" value="10" required
+                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all">
+                <span id="baseError" class="text-red-500 text-sm"></span>
+            </div>
+            
+            <div class="space-y-2">
+                <label for="numQuestions" class="block text-sm font-semibold text-gray-700">Number of Questions:</label>
+                <input type="number" id="numQuestions" min="1" max="100" value="10" required
+                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all">
+            </div>
+            
+            <div class="space-y-2">
+                <label for="maxDigits" class="block text-sm font-semibold text-gray-700">Maximum Digits per Number:</label>
+                <input type="number" id="maxDigits" min="1" max="10" value="2" required
+                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all">
+            </div>
+            
+            <div class="space-y-2">
+                <label class="block text-sm font-semibold text-gray-700">Operations:</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="flex items-center space-x-3 p-3 border-2 border-gray-300 rounded-lg hover:bg-purple-50 hover:border-purple-400 cursor-pointer transition-all">
+                        <input type="checkbox" id="addition" checked class="w-5 h-5 text-purple-600 rounded focus:ring-purple-500">
+                        <span class="text-gray-700">Addition</span>
+                    </label>
+                    <label class="flex items-center space-x-3 p-3 border-2 border-gray-300 rounded-lg hover:bg-purple-50 hover:border-purple-400 cursor-pointer transition-all">
+                        <input type="checkbox" id="subtraction" checked class="w-5 h-5 text-purple-600 rounded focus:ring-purple-500">
+                        <span class="text-gray-700">Subtraction</span>
+                    </label>
+                    <label class="flex items-center space-x-3 p-3 border-2 border-gray-300 rounded-lg hover:bg-purple-50 hover:border-purple-400 cursor-pointer transition-all">
+                        <input type="checkbox" id="multiplication" checked class="w-5 h-5 text-purple-600 rounded focus:ring-purple-500">
+                        <span class="text-gray-700">Multiplication</span>
+                    </label>
+                    <label class="flex items-center space-x-3 p-3 border-2 border-gray-300 rounded-lg hover:bg-purple-50 hover:border-purple-400 cursor-pointer transition-all">
+                        <input type="checkbox" id="division" checked class="w-5 h-5 text-purple-600 rounded focus:ring-purple-500" onchange="toggleDivisionSettings()">
+                        <span class="text-gray-700">Division</span>
+                    </label>
+                </div>
+                <span id="operationsError" class="text-red-500 text-sm"></span>
+            </div>
+            
+            <div id="divisionSettings" class="space-y-2">
+                <label for="fractionalDigits" class="block text-sm font-semibold text-gray-700">
+                    Fractional Digits for Division (digits after the point):
+                </label>
+                <input type="number" id="fractionalDigits" min="0" max="10" value="2" required
+                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all">
+                <p class="text-xs text-gray-500">For division answers, specify how many digits after the point to round to (0 = whole numbers only)</p>
+            </div>
+            
+            <button onclick="startQuiz()" 
+                class="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-indigo-700 transform hover:-translate-y-0.5 transition-all shadow-lg hover:shadow-xl">
+                Start Quiz
+            </button>
+        </div>
+        
+        <div id="quizArea" class="hidden space-y-4">
+            <div id="progress" class="text-center text-gray-600 font-medium bg-gray-100 rounded-lg py-3"></div>
+            <div id="questionsContainer" class="space-y-4"></div>
+            <button onclick="submitAnswer()" id="submitBtn"
+                class="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-indigo-700 transform hover:-translate-y-0.5 transition-all shadow-lg hover:shadow-xl">
+                Submit Answer
+            </button>
+        </div>
+        
+        <div id="results" class="hidden text-center space-y-6">
+            <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-8">
+                <h2 class="text-3xl font-bold text-purple-600 mb-4">Quiz Complete!</h2>
+                <div id="finalScore" class="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600 my-6"></div>
+            </div>
+            <button onclick="resetQuiz()"
+                class="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-indigo-700 transform hover:-translate-y-0.5 transition-all shadow-lg hover:shadow-xl">
+                Try Again
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let quizSettings = {};
+        let questions = [];
+        let currentQuestion = 0;
+        let correctAnswers = 0;
+
+        const digits = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        window.digits = digits; // Make it accessible for the toBaseNDecimal function
+
+        function toggleDivisionSettings() {
+            const divisionChecked = document.getElementById('division').checked;
+            const divisionSettings = document.getElementById('divisionSettings');
+            if (divisionChecked) {
+                divisionSettings.classList.remove('hidden');
+            } else {
+                divisionSettings.classList.add('hidden');
+            }
+        }
+
+        function toBaseN(num, base) {
+            if (base === 1) return '1'.repeat(num);
+            if (num === 0) return '0';
+            
+            let result = '';
+            let isNegative = num < 0;
+            num = Math.abs(num);
+            
+            while (num > 0) {
+                result = digits[num % base] + result;
+                num = Math.floor(num / base);
+            }
+            
+            return isNegative ? '-' + result : result;
+        }
+
+        function fromBaseN(str, base) {
+            if (base === 1) return str.length;
+            
+            str = str.toUpperCase().trim();
+            let isNegative = str[0] === '-';
+            if (isNegative) str = str.substring(1);
+            
+            let result = 0;
+            let power = 0;
+            
+            for (let i = str.length - 1; i >= 0; i--) {
+                let digitValue = digits.indexOf(str[i]);
+                if (digitValue === -1 || digitValue >= base) {
+                    return NaN;
+                }
+                result += digitValue * Math.pow(base, power);
+                power++;
+            }
+            
+            return isNegative ? -result : result;
+        }
+
+        function checkAnswer(userAnswer, question) {
+            if (question.operation === '/') {
+                // For division, accept multiple valid answers
+                // 1. The properly rounded answer to the specified fractional digits
+                if (userAnswer === question.answerBase) return true;
+                
+                // 2. Also accept the exact answer if given more precision
+                let userValue = fromBaseNDecimal(userAnswer, quizSettings.base);
+                if (!isNaN(userValue)) {
+                    // Check if it's very close to the actual answer (allows for more precision)
+                    let difference = Math.abs(userValue - question.answer);
+                    if (difference < Math.pow(quizSettings.base, -(quizSettings.fractionalDigits + 1))) return true;
+                }
+                
+                // 3. Also accept if it matches when we round to the same number of fractional digits as user provided
+                if (userAnswer.includes('.')) {
+                    let userDecimalPlaces = userAnswer.split('.')[1].length;
+                    let alternativeAnswer = toBaseNDecimal(question.answer, quizSettings.base, userDecimalPlaces);
+                    if (userAnswer === alternativeAnswer) return true;
+                } else if (quizSettings.fractionalDigits === 0) {
+                    // If expecting whole numbers, also accept the rounded integer
+                    let roundedAnswer = toBaseN(Math.round(question.answer), quizSettings.base);
+                    if (userAnswer === roundedAnswer) return true;
+                }
+                
+                return false;
+            } else {
+                // For other operations, exact match
+                return userAnswer === question.answerBase;
+            }
+        }
+
+        function toBaseNDecimal(num, base, decimalPlaces = 2) {
+            if (base === 1) return toBaseN(Math.round(num), base);
+            
+            // If 0 decimal places requested, return rounded integer
+            if (decimalPlaces === 0) {
+                return toBaseN(Math.round(num), base);
+            }
+            
+            let integerPart = Math.floor(Math.abs(num));
+            let fractionalPart = Math.abs(num) - integerPart;
+            
+            let result = toBaseN(integerPart, base);
+            
+            if (fractionalPart > 0 && decimalPlaces > 0) {
+                result += '.';
+                let digits = [];
+                
+                // Generate one extra digit for rounding
+                for (let i = 0; i <= decimalPlaces; i++) {
+                    fractionalPart *= base;
+                    let digit = Math.floor(fractionalPart);
+                    digits.push(digit);
+                    fractionalPart -= digit;
+                }
+                
+                // Round the last digit
+                if (digits[decimalPlaces] >= base / 2) {
+                    // Need to round up
+                    let carry = 1;
+                    for (let i = decimalPlaces - 1; i >= 0 && carry; i--) {
+                        digits[i] += carry;
+                        if (digits[i] >= base) {
+                            digits[i] = 0;
+                        } else {
+                            carry = 0;
+                        }
+                    }
+                    // If we still have carry, we need to round up the integer part
+                    if (carry) {
+                        integerPart++;
+                        result = toBaseN(integerPart, base) + '.';
+                        digits.fill(0);
+                    }
+                }
+                
+                // Build the final result
+                for (let i = 0; i < decimalPlaces; i++) {
+                    result += window.digits[digits[i]];
+                }
+            }
+            
+            return num < 0 ? '-' + result : result;
+        }
+
+        function fromBaseNDecimal(str, base) {
+            if (base === 1) return fromBaseN(str, base);
+            
+            str = str.toUpperCase().trim();
+            let parts = str.split('.');
+            
+            let integerValue = fromBaseN(parts[0], base);
+            if (isNaN(integerValue)) return NaN;
+            
+            if (parts.length === 1) return integerValue;
+            
+            let fractionalValue = 0;
+            let fractionalStr = parts[1];
+            for (let i = 0; i < fractionalStr.length; i++) {
+                let digitValue = digits.indexOf(fractionalStr[i]);
+                if (digitValue === -1 || digitValue >= base) return NaN;
+                fractionalValue += digitValue * Math.pow(base, -(i + 1));
+            }
+            
+            return integerValue + (integerValue < 0 ? -fractionalValue : fractionalValue);
+        }
+
+        function generateRandomNumber(maxDigits, base) {
+            if (base === 1) {
+                return Math.floor(Math.random() * Math.pow(10, Math.min(maxDigits, 2))) + 1;
+            }
+            
+            let maxValue = Math.pow(base, maxDigits) - 1;
+            return Math.floor(Math.random() * maxValue) + 1;
+        }
+
+        function generateQuestion(settings) {
+            let operations = [];
+            if (settings.addition) operations.push('+');
+            if (settings.subtraction) operations.push('-');
+            if (settings.multiplication) operations.push('*');
+            if (settings.division) operations.push('/');
+            
+            let operation = operations[Math.floor(Math.random() * operations.length)];
+            let num1 = generateRandomNumber(settings.maxDigits, settings.base);
+            let num2 = generateRandomNumber(settings.maxDigits, settings.base);
+            
+            // For subtraction, ensure positive result
+            if (operation === '-' && num2 > num1) {
+                [num1, num2] = [num2, num1];
+            }
+            
+            // For division, ensure divisor is not zero
+            if (operation === '/' && num2 === 0) {
+                num2 = 1;
+            }
+            
+            let answer;
+            switch (operation) {
+                case '+': answer = num1 + num2; break;
+                case '-': answer = num1 - num2; break;
+                case '*': answer = num1 * num2; break;
+                case '/': answer = num1 / num2; break;
+            }
+            
+            return {
+                num1: num1,
+                num2: num2,
+                operation: operation,
+                answer: answer,
+                num1Base: toBaseN(num1, settings.base),
+                num2Base: toBaseN(num2, settings.base),
+                answerBase: operation === '/' ? toBaseNDecimal(answer, settings.base, settings.fractionalDigits) : toBaseN(Math.floor(answer), settings.base)
+            };
+        }
+
+        function startQuiz() {
+            // Validate inputs
+            let base = parseInt(document.getElementById('base').value);
+            let numQuestions = parseInt(document.getElementById('numQuestions').value);
+            let maxDigits = parseInt(document.getElementById('maxDigits').value);
+            let fractionalDigits = parseInt(document.getElementById('fractionalDigits').value);
+            
+            let operations = {
+                addition: document.getElementById('addition').checked,
+                subtraction: document.getElementById('subtraction').checked,
+                multiplication: document.getElementById('multiplication').checked,
+                division: document.getElementById('division').checked
+            };
+            
+            // Clear previous errors
+            document.getElementById('baseError').textContent = '';
+            document.getElementById('operationsError').textContent = '';
+            
+            // Validation
+            if (base < 1 || base > 36 || isNaN(base)) {
+                document.getElementById('baseError').textContent = 'Base must be between 1 and 36';
+                return;
+            }
+            
+            if (!operations.addition && !operations.subtraction && !operations.multiplication && !operations.division) {
+                document.getElementById('operationsError').textContent = 'Please select at least one operation';
+                return;
+            }
+            
+            quizSettings = {
+                base: base,
+                numQuestions: numQuestions,
+                maxDigits: maxDigits,
+                fractionalDigits: fractionalDigits,
+                ...operations
+            };
+            
+            // Generate questions
+            questions = [];
+            for (let i = 0; i < numQuestions; i++) {
+                questions.push(generateQuestion(quizSettings));
+            }
+            
+            currentQuestion = 0;
+            correctAnswers = 0;
+            
+            // Hide setup, show quiz
+            document.getElementById('setupForm').classList.add('hidden');
+            document.getElementById('quizArea').classList.remove('hidden');
+            
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            if (currentQuestion >= questions.length) {
+                showResults();
+                return;
+            }
+            
+            let q = questions[currentQuestion];
+            let operationSymbol = q.operation;
+            if (operationSymbol === '*') operationSymbol = '×';
+            if (operationSymbol === '/') operationSymbol = '÷';
+            
+            document.getElementById('progress').textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+            
+            // Rebuild all questions to preserve previous answers
+            let allQuestionsHTML = '';
+            for (let i = 0; i <= currentQuestion; i++) {
+                let question = questions[i];
+                let opSymbol = question.operation;
+                if (opSymbol === '*') opSymbol = '×';
+                if (opSymbol === '/') opSymbol = '÷';
+                
+                let value = question.userAnswer || '';
+                let disabled = i < currentQuestion ? 'disabled' : '';
+                let placeholder = i === currentQuestion ? `Enter answer in base ${quizSettings.base}` : '';
+                
+                allQuestionsHTML += `
+                    <div class="bg-gray-50 rounded-lg p-4 border-l-4 border-purple-500">
+                        <div class="text-xl font-medium text-gray-800 mb-3">${question.num1Base} ${opSymbol} ${question.num2Base} = </div>
+                        <div class="flex items-center space-x-3">
+                            <input type="text" id="answerInput_${i}" value="${value}" placeholder="${placeholder}" ${disabled}
+                                class="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all uppercase ${disabled ? 'bg-gray-100' : ''}"
+                                ${i === currentQuestion ? 'onkeypress="if(event.key===\'Enter\') submitAnswer()"' : ''}>
+                            <span id="feedback_${i}" class="text-2xl"></span>
+                        </div>
+                        <div id="correctAnswer_${i}" class="text-gray-600 mt-2 text-sm"></div>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('questionsContainer').innerHTML = allQuestionsHTML;
+            
+            // Restore feedback for answered questions
+            for (let i = 0; i < currentQuestion; i++) {
+                if (questions[i].userAnswer) {
+                    let isCorrect = checkAnswer(questions[i].userAnswer, questions[i]);
+                    
+                    let feedbackElement = document.getElementById(`feedback_${i}`);
+                    if (isCorrect) {
+                        feedbackElement.innerHTML = '✓';
+                        feedbackElement.className = 'text-2xl text-green-500';
+                    } else {
+                        feedbackElement.innerHTML = '✗';
+                        feedbackElement.className = 'text-2xl text-red-500';
+                        document.getElementById(`correctAnswer_${i}`).innerHTML = 
+                            `Correct answer: ${questions[i].answerBase}`;
+                    }
+                }
+            }
+            
+            document.getElementById(`answerInput_${currentQuestion}`).focus();
+        }
+
+        function submitAnswer() {
+            let currentInput = document.getElementById(`answerInput_${currentQuestion}`);
+            let userAnswer = currentInput.value.trim().toUpperCase();
+            if (!userAnswer) return;
+            
+            // Store the user's answer in the question object
+            questions[currentQuestion].userAnswer = userAnswer;
+            
+            let q = questions[currentQuestion];
+            let isCorrect = checkAnswer(userAnswer, q);
+            
+            let feedbackElement = document.getElementById(`feedback_${currentQuestion}`);
+            if (isCorrect) {
+                feedbackElement.innerHTML = '✓';
+                feedbackElement.className = 'text-2xl text-green-500';
+                correctAnswers++;
+            } else {
+                feedbackElement.innerHTML = '✗';
+                feedbackElement.className = 'text-2xl text-red-500';
+                // Show correct answer
+                document.getElementById(`correctAnswer_${currentQuestion}`).innerHTML = 
+                    `Correct answer: ${q.answerBase}`;
+            }
+            
+            currentInput.disabled = true;
+            currentInput.classList.add('bg-gray-100');
+            
+            currentQuestion++;
+            
+            if (currentQuestion < questions.length) {
+                setTimeout(() => displayQuestion(), 500);
+            } else {
+                setTimeout(() => showResults(), 1000);
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quizArea').classList.add('hidden');
+            document.getElementById('results').classList.remove('hidden');
+            
+            let percentage = Math.round((correctAnswers / questions.length) * 100);
+            document.getElementById('finalScore').textContent = `${percentage}%`;
+            
+            let resultsHTML = document.getElementById('results').innerHTML;
+            document.getElementById('results').innerHTML = resultsHTML.replace('Quiz Complete!', 
+                `Quiz Complete! You got ${correctAnswers} out of ${questions.length} correct.`);
+        }
+
+        function resetQuiz() {
+            document.getElementById('setupForm').classList.remove('hidden');
+            document.getElementById('quizArea').classList.add('hidden');
+            document.getElementById('results').classList.add('hidden');
+            document.getElementById('questionsContainer').innerHTML = '';
+            document.getElementById('results').innerHTML = `
+                <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-8">
+                    <h2 class="text-3xl font-bold text-purple-600 mb-4">Quiz Complete!</h2>
+                    <div id="finalScore" class="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600 my-6"></div>
+                </div>
+                <button onclick="resetQuiz()"
+                    class="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-indigo-700 transform hover:-translate-y-0.5 transition-all shadow-lg hover:shadow-xl">
+                    Try Again
+                </button>
+            `;
+        }
+    </script>
+</body>
+</html>
