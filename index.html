@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base-N World - Explore Different Number Systems</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <div class="container mx-auto px-4 py-12 max-w-6xl">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">
+                Base-N World
+            </h1>
+            <p class="text-xl text-gray-300">Explore how mathematics and time work in different number systems</p>
+        </div>
+
+        <!-- Tools Grid -->
+        <div class="grid md:grid-cols-2 gap-8 mb-12">
+            <!-- Math Quiz Card -->
+            <a href="base_n_math/index.html" class="group block">
+                <div class="bg-gray-800 rounded-xl p-8 shadow-xl transition-all duration-300 group-hover:shadow-2xl group-hover:scale-105 group-hover:bg-gray-750 border border-gray-700 group-hover:border-blue-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mr-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold">Base-N Math Quiz</h2>
+                    </div>
+                    <p class="text-gray-400 mb-4">
+                        Practice arithmetic operations in different number bases. Test your skills with addition, subtraction, multiplication, and division in bases 2 through 36.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-3 py-1 bg-gray-700 rounded-full text-sm">Interactive Quiz</span>
+                        <span class="px-3 py-1 bg-gray-700 rounded-full text-sm">Base 2-36</span>
+                        <span class="px-3 py-1 bg-gray-700 rounded-full text-sm">All Operations</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Clock Card -->
+            <a href="base_n_clock/index.html" class="group block">
+                <div class="bg-gray-800 rounded-xl p-8 shadow-xl transition-all duration-300 group-hover:shadow-2xl group-hover:scale-105 group-hover:bg-gray-750 border border-gray-700 group-hover:border-purple-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mr-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold">Base-N Clock</h2>
+                    </div>
+                    <p class="text-gray-400 mb-4">
+                        Watch time flow in different number bases. See how a day divides into base-N units with a beautiful analog clock and digital display.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-3 py-1 bg-gray-700 rounded-full text-sm">Real-time</span>
+                        <span class="px-3 py-1 bg-gray-700 rounded-full text-sm">Analog & Digital</span>
+                        <span class="px-3 py-1 bg-gray-700 rounded-full text-sm">Customizable</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- About Section -->
+        <div class="bg-gray-800 rounded-xl p-8 border border-gray-700">
+            <h3 class="text-xl font-semibold mb-4">About Base-N World</h3>
+            <p class="text-gray-400 leading-relaxed">
+                Base-N World is a collection of educational tools designed to help you explore and understand different number systems. 
+                While we use base-10 (decimal) in everyday life, computers use base-2 (binary), and programmers often work with base-16 (hexadecimal). 
+                These interactive tools let you experience mathematics and time representation in any base from 2 to 36, using digits 0-9 and letters A-Z.
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-12 text-gray-500 text-sm">
+            <p>Explore the beauty of different number systems</p>
+        </div>
+    </div>
+
+    <script>
+        // Add subtle animation to the gradient title
+        const title = document.querySelector('h1');
+        let hue = 0;
+        
+        function animateGradient() {
+            hue = (hue + 0.5) % 360;
+            title.style.background = `linear-gradient(to right, hsl(${hue}, 70%, 60%), hsl(${(hue + 60) % 360}, 70%, 60%))`;
+            title.style.backgroundClip = 'text';
+            title.style.webkitBackgroundClip = 'text';
+            requestAnimationFrame(animateGradient);
+        }
+        
+        animateGradient();
+    </script>
+</body>
+</html>
