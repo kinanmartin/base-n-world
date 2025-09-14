@@ -51,12 +51,69 @@
             </svg>
         </button>
 
-        <div id="sidebar" class="sidebar fixed top-0 right-0 h-full bg-gray-800 shadow-xl z-40 w-80 overflow-y-auto">
+        <div id="sidebar" class="sidebar collapsed fixed top-0 right-0 h-full bg-gray-800 shadow-xl z-40 w-80 overflow-y-auto">
                     <div class="p-6">
                         <div class="mb-6">
                             <h1 class="text-2xl font-bold mb-1">Base-N Clock</h1>
                             <p class="text-sm text-gray-400">Explore time in different number bases</p>
                         </div>
+
+                    <!-- Presets -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium mb-2">Presets</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="applyPreset(6, 180, 6, 6, 2)" class="preset-btn bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm transition-colors">
+                                <div class="font-semibold">Base 6</div>
+                                <div class="text-xs text-gray-300">Senary</div>
+                            </button>
+                            <button onclick="applyPreset(10, 0, 5, 5, 2)" class="preset-btn bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm transition-colors">
+                                <div class="font-semibold">Base 10</div>
+                                <div class="text-xs text-gray-300">Decimal</div>
+                            </button>
+                            <button onclick="applyPreset(2, 0, 'max', 'max', 0)" class="preset-btn bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm transition-colors">
+                                <div class="font-semibold">Base 2</div>
+                                <div class="text-xs text-gray-300">Binary</div>
+                            </button>
+                            <button onclick="applyPreset(12, 180, 4, 4, 2)" class="preset-btn bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm transition-colors">
+                                <div class="font-semibold">Base 12</div>
+                                <div class="text-xs text-gray-300">Duodecimal</div>
+                            </button>
+                            <button onclick="applyPreset(36, 180, 'max', 'max', 0)" class="preset-btn bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm transition-colors">
+                                <div class="font-semibold">Base 36</div>
+                                <div class="text-xs text-gray-300">Hexatrigesimal</div>
+                            </button>
+                            <button onclick="applyPreset(16, 0, 'max', 'max', 2)" class="preset-btn bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm transition-colors">
+                                <div class="font-semibold">Base 16</div>
+                                <div class="text-xs text-gray-300">Hexadecimal</div>
+                            </button>
+                        </div>
+                        
+                        <!-- Custom Presets -->
+                        <div class="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-gray-600">
+                            <div class="relative">
+                                <button id="customPreset1" onclick="applyCustomPreset(1)" class="w-full bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <div class="font-semibold">Custom 1</div>
+                                    <div id="customPreset1Label" class="text-xs text-gray-400">Empty</div>
+                                </button>
+                                <button onclick="saveCustomPreset(1)" title="Save current settings to Custom 1" class="absolute top-0 right-0 bg-blue-600 hover:bg-blue-500 text-white p-1 rounded-tr rounded-bl text-xs">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V2" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="relative">
+                                <button id="customPreset2" onclick="applyCustomPreset(2)" class="w-full bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <div class="font-semibold">Custom 2</div>
+                                    <div id="customPreset2Label" class="text-xs text-gray-400">Empty</div>
+                                </button>
+                                <button onclick="saveCustomPreset(2)" title="Save current settings to Custom 2" class="absolute top-0 right-0 bg-blue-600 hover:bg-blue-500 text-white p-1 rounded-tr rounded-bl text-xs">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V2" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Base Selection -->
                     <div class="mb-6">
@@ -112,8 +169,8 @@
                     <div class="mb-6">
                         <label for="thicknessSlider" class="block text-sm font-medium mb-2">Hand Thickness</label>
                         <div class="flex items-center gap-2">
-                            <input type="range" id="thicknessSlider" min="2" max="12" value="6" class="flex-1">
-                            <span id="thicknessValue" class="text-sm w-8">6</span>
+                            <input type="range" id="thicknessSlider" min="2" max="12" value="10" class="flex-1">
+                            <span id="thicknessValue" class="text-sm w-8">10</span>
                         </div>
                         <div class="text-xs text-gray-400 mt-1">Base thickness for primary hand</div>
                     </div>
@@ -169,16 +226,16 @@
     </div>
 
     <script>
-        // Global state
-        let currentBase = 10;
+        // Global state - Base 6 preset as default
+        let currentBase = 6;
         let clockDirection = 'clockwise';
-        let clockRotation = 0;
+        let clockRotation = 180;
         let showLabels = true;
         let handLengthStyle = 'longer';
         let maxHands = 6;
         let maxUnits = 6;
-        let separatorDigits = 1;
-        let handThickness = 6; // Base thickness for the primary hand
+        let separatorDigits = 2;
+        let handThickness = 10; // Base thickness for the primary hand
         let animationFrame = null;
 
         // Constants
@@ -193,8 +250,10 @@
         const baseLabel = document.getElementById('baseLabel');
         const timeUnits = document.getElementById('timeUnits');
         
-        // localStorage key
+        // localStorage keys
         const STORAGE_KEY = 'baseNClockSettings';
+        const CUSTOM_PRESET_1_KEY = 'baseNClockCustom1';
+        const CUSTOM_PRESET_2_KEY = 'baseNClockCustom2';
         
         // Load settings from localStorage
         function loadSettings() {
@@ -204,15 +263,15 @@
                     const settings = JSON.parse(saved);
                     
                     // Apply saved settings
-                    currentBase = settings.base || 10;
+                    currentBase = settings.base || 6;
                     clockDirection = settings.direction || 'clockwise';
-                    clockRotation = settings.rotation || 0;
+                    clockRotation = settings.rotation || 180;
                     showLabels = settings.showLabels !== undefined ? settings.showLabels : true;
                     handLengthStyle = settings.handLengthStyle || 'longer';
                     maxHands = settings.maxHands || 6;
                     maxUnits = settings.maxUnits || 6;
-                    separatorDigits = settings.separatorDigits !== undefined ? settings.separatorDigits : 1;
-                    handThickness = settings.handThickness || 6;
+                    separatorDigits = settings.separatorDigits !== undefined ? settings.separatorDigits : 2;
+                    handThickness = settings.handThickness || 10;
                     
                     // Update UI elements to reflect loaded settings
                     document.getElementById('baseSlider').value = currentBase;
@@ -262,6 +321,7 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             loadSettings();
+            loadCustomPresets();
             setupEventListeners();
             resizeCanvas();
             window.addEventListener('resize', resizeCanvas);
@@ -673,6 +733,124 @@
             animationFrame = requestAnimationFrame(updateClock);
         }
 
+        // Apply preset function
+        function applyPreset(base, rotation, hands, units, separator) {
+            // Update base
+            currentBase = base;
+            document.getElementById('baseSlider').value = base;
+            document.getElementById('baseInput').value = base;
+            updateBaseDisplay();
+            
+            // Calculate max possible for this base
+            const maxPossible = calculateMaxPossibleUnits();
+            
+            // Update rotation
+            clockRotation = rotation;
+            document.getElementById('rotationSlider').value = rotation;
+            document.getElementById('rotationValue').textContent = rotation + '°';
+            
+            // Update hands
+            if (hands === 'max') {
+                maxHands = maxPossible;
+            } else {
+                maxHands = Math.min(hands, maxPossible);
+            }
+            document.getElementById('maxHandsSlider').value = maxHands;
+            document.getElementById('maxHandsValue').textContent = maxHands;
+            
+            // Update units
+            if (units === 'max') {
+                maxUnits = maxPossible;
+            } else {
+                maxUnits = Math.min(units, maxPossible);
+            }
+            document.getElementById('maxUnitsSlider').value = maxUnits;
+            document.getElementById('maxUnitsValue').textContent = maxUnits;
+            
+            // Update separator
+            separatorDigits = separator;
+            document.getElementById('separatorInput').value = separator;
+            
+            // Save settings
+            saveSettings();
+        }
+        
+        // Save custom preset
+        function saveCustomPreset(slot) {
+            const preset = {
+                base: currentBase,
+                rotation: clockRotation,
+                hands: maxHands,
+                units: maxUnits,
+                separator: separatorDigits,
+                direction: clockDirection,
+                handLengthStyle: handLengthStyle,
+                showLabels: showLabels,
+                handThickness: handThickness
+            };
+            
+            const key = slot === 1 ? CUSTOM_PRESET_1_KEY : CUSTOM_PRESET_2_KEY;
+            localStorage.setItem(key, JSON.stringify(preset));
+            
+            // Update label
+            const label = document.getElementById(`customPreset${slot}Label`);
+            label.textContent = `Base ${currentBase}`;
+            
+            // Enable the button
+            document.getElementById(`customPreset${slot}`).disabled = false;
+        }
+        
+        // Apply custom preset
+        function applyCustomPreset(slot) {
+            const key = slot === 1 ? CUSTOM_PRESET_1_KEY : CUSTOM_PRESET_2_KEY;
+            const saved = localStorage.getItem(key);
+            
+            if (saved) {
+                const preset = JSON.parse(saved);
+                
+                // Apply base preset settings
+                applyPreset(preset.base, preset.rotation, preset.hands, preset.units, preset.separator);
+                
+                // Apply additional settings
+                clockDirection = preset.direction || 'clockwise';
+                handLengthStyle = preset.handLengthStyle || 'longer';
+                showLabels = preset.showLabels !== undefined ? preset.showLabels : true;
+                handThickness = preset.handThickness || 10;
+                
+                // Update UI for additional settings
+                document.querySelector(`input[name="direction"][value="${clockDirection}"]`).checked = true;
+                document.querySelector(`input[name="handLength"][value="${handLengthStyle}"]`).checked = true;
+                document.getElementById('showLabels').checked = showLabels;
+                document.getElementById('thicknessSlider').value = handThickness;
+                document.getElementById('thicknessValue').textContent = handThickness;
+                
+                saveSettings();
+            }
+        }
+        
+        // Load custom presets on startup
+        function loadCustomPresets() {
+            // Load Custom 1
+            const custom1 = localStorage.getItem(CUSTOM_PRESET_1_KEY);
+            if (custom1) {
+                const preset = JSON.parse(custom1);
+                document.getElementById('customPreset1Label').textContent = `Base ${preset.base}`;
+                document.getElementById('customPreset1').disabled = false;
+            } else {
+                document.getElementById('customPreset1').disabled = true;
+            }
+            
+            // Load Custom 2
+            const custom2 = localStorage.getItem(CUSTOM_PRESET_2_KEY);
+            if (custom2) {
+                const preset = JSON.parse(custom2);
+                document.getElementById('customPreset2Label').textContent = `Base ${preset.base}`;
+                document.getElementById('customPreset2').disabled = false;
+            } else {
+                document.getElementById('customPreset2').disabled = true;
+            }
+        }
+        
         // Start the clock
         updateBaseDisplay();
     </script>
