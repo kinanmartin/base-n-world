@@ -62,7 +62,7 @@
                     <div class="mb-6">
                         <label class="block text-sm font-medium mb-2">Presets</label>
                         <div class="grid grid-cols-2 gap-2">
-                            <button onclick="applyPreset(6, 180, 6, 6, 2)" class="preset-btn bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm transition-colors">
+                            <button onclick="applyPreset(6, 0, 6, 6, 2)" class="preset-btn bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm transition-colors">
                                 <div class="font-semibold">Base 6</div>
                                 <div class="text-xs text-gray-300">Senary</div>
                             </button>
@@ -74,11 +74,11 @@
                                 <div class="font-semibold">Base 2</div>
                                 <div class="text-xs text-gray-300">Binary</div>
                             </button>
-                            <button onclick="applyPreset(12, 180, 4, 4, 2)" class="preset-btn bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm transition-colors">
+                            <button onclick="applyPreset(12, 0, 4, 4, 2)" class="preset-btn bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm transition-colors">
                                 <div class="font-semibold">Base 12</div>
                                 <div class="text-xs text-gray-300">Duodecimal</div>
                             </button>
-                            <button onclick="applyPreset(36, 180, 'max', 'max', 0)" class="preset-btn bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm transition-colors">
+                            <button onclick="applyPreset(36, 0, 'max', 'max', 0)" class="preset-btn bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm transition-colors">
                                 <div class="font-semibold">Base 36</div>
                                 <div class="text-xs text-gray-300">Hexatrigesimal</div>
                             </button>
@@ -229,7 +229,7 @@
         // Global state - Base 6 preset as default
         let currentBase = 6;
         let clockDirection = 'clockwise';
-        let clockRotation = 180;
+        let clockRotation = 0;
         let showLabels = true;
         let handLengthStyle = 'longer';
         let maxHands = 6;
@@ -265,7 +265,7 @@
                     // Apply saved settings
                     currentBase = settings.base || 6;
                     clockDirection = settings.direction || 'clockwise';
-                    clockRotation = settings.rotation || 180;
+                    clockRotation = settings.rotation || 0;
                     showLabels = settings.showLabels !== undefined ? settings.showLabels : true;
                     handLengthStyle = settings.handLengthStyle || 'longer';
                     maxHands = settings.maxHands || 6;
